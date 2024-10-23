@@ -1,213 +1,191 @@
-"use client"
+'use client'
 
 import { useState } from 'react'
-import { CalendarIcon, Zap, DollarSign, Clock, Sun } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Input } from "@/components/ui/input"
+import { Sun, Zap, BarChart3, Settings, ChevronRight } from 'lucide-react'
 
-// Mock data for the charts
-const data = [
-  { time: '00:00', usage: 2, cost: 0.24, solar: 0 },
-  { time: '03:00', usage: 1.5, cost: 0.15, solar: 0 },
-  { time: '06:00', usage: 3, cost: 0.45, solar: 0.5 },
-  { time: '09:00', usage: 5, cost: 0.75, solar: 2 },
-  { time: '12:00', usage: 4, cost: 0.60, solar: 3 },
-  { time: '15:00', usage: 4.5, cost: 0.68, solar: 2.5 },
-  { time: '18:00', usage: 6, cost: 1.20, solar: 1 },
-  { time: '21:00', usage: 3.5, cost: 0.53, solar: 0 },
-]
+export default function LandingPage() {
+  const [email, setEmail] = useState('')
 
-const tasks = [
-  { name: 'Laundry', type: 'high' },
-  { name: 'Dishwasher', type: 'medium' },
-  { name: 'Charging Electric Vehicle', type: 'high' },
-  { name: 'Computer Work', type: 'low' },
-  { name: 'Cooking', type: 'medium' },
-]
-
-export default function Home() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
-
-  const totalUsage = data.reduce((sum, item) => sum + item.usage, 0)
-  const totalCost = data.reduce((sum, item) => sum + item.cost, 0)
-  const totalSolar = data.reduce((sum, item) => sum + item.solar, 0)
-  const averageUsage = totalUsage / data.length
-  
-  const findIdealTime = (taskType: string) => {
-    const sortedData = [...data].sort((a, b) => {
-      const aEfficiency = (a.solar - a.usage) / a.cost
-      const bEfficiency = (b.solar - b.usage) / b.cost
-      return bEfficiency - aEfficiency
-    })
-
-    const usageThresholds = { low: 2, medium: 4, high: Infinity }
-    return sortedData.find(item => item.usage <= usageThresholds[taskType as keyof typeof usageThresholds])
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Handle form submission here
+    console.log('Form submitted with email:', email)
   }
 
-  const idealTimes = tasks.reduce((acc, task) => {
-    const idealTime = findIdealTime(task.type)
-    if (idealTime && !acc.some(item => item.time === idealTime.time)) {
-      acc.push({ ...idealTime, taskName: task.name, taskType: task.type })
-    }
-    return acc
-  }, [] as Array<typeof data[0] & { taskName: string, taskType: string }>)
-
   return (
-    <div className="container mx-auto p-4">
-      <header className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Enhanced Power Consumption Dashboard</h1>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="w-[280px] justify-start text-left font-normal">
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {selectedDate ? selectedDate.toDateString() : "Pick a date"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
+    <div className="flex flex-col min-h-screen">
+      <header className="px-4 lg:px-6 h-14 flex items-center">
+        <a className="flex items-center justify-center" href="#">
+          <Sun className="h-6 w-6 text-yellow-500" />
+          <span className="ml-2 text-2xl font-bold">SolarFlex</span>
+        </a>
+        <nav className="ml-auto flex gap-4 sm:gap-6">
+          <a className="text-sm font-medium hover:underline underline-offset-4" href="#about">
+            About
+          </a>
+          <a className="text-sm font-medium hover:underline underline-offset-4" href="#features">
+            Features
+          </a>
+          <a className="text-sm font-medium hover:underline underline-offset-4" href="#how-it-works">
+            How It Works
+          </a>
+          <a className="text-sm font-medium hover:underline underline-offset-4" href="#testimonials">
+            Testimonials
+          </a>
+        </nav>
       </header>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Electricity Usage and Solar Production</CardTitle>
-            <CardDescription>Kilowatt-hours (kWh) used and produced throughout the day</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer
-              config={{
-                usage: {
-                  label: "Usage (kWh)",
-                  color: "hsl(var(--chart-1))",
-                },
-                solar: {
-                  label: "Solar (kWh)",
-                  color: "hsl(var(--chart-2))",
-                },
-              }}
-              className="h-[300px]"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Legend />
-                  <Line type="monotone" dataKey="usage" stroke="var(--color-usage)" name="Usage (kWh)" />
-                  <Line type="monotone" dataKey="solar" stroke="var(--color-solar)" name="Solar (kWh)" />
-                </LineChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Electricity Cost</CardTitle>
-            <CardDescription>Cost in dollars throughout the day</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer
-              config={{
-                cost: {
-                  label: "Cost ($)",
-                  color: "hsl(var(--chart-3))",
-                },
-              }}
-              className="h-[300px]"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Legend />
-                  <Line type="monotone" dataKey="cost" stroke="var(--color-cost)" name="Cost ($)" />
-                </LineChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-4 mt-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Usage</CardTitle>
-            <Zap className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalUsage.toFixed(2)} kWh</div>
-            <p className="text-xs text-muted-foreground">For the selected day</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Cost</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${totalCost.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">For the selected day</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Usage</CardTitle>
-            <Zap className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{averageUsage.toFixed(2)} kWh</div>
-            <p className="text-xs text-muted-foreground">Per 3-hour period</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Solar</CardTitle>
-            <Sun className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalSolar.toFixed(2)} kWh</div>
-            <p className="text-xs text-muted-foreground">For the selected day</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>Ideal Times for Tasks</CardTitle>
-          <CardDescription>Based on usage type, solar production, and cost</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {idealTimes.map((idealTime, index) => (
-              <div key={index} className="flex items-center space-x-4">
-                <Clock className="h-6 w-6 text-muted-foreground" />
-                <div>
-                  <p className="text-lg font-semibold">{idealTime.taskName} ({idealTime.taskType} usage)</p>
-                  <p className="text-sm text-muted-foreground">
-                    Ideal time: {idealTime.time} | Cost: ${idealTime.cost.toFixed(2)} | 
-                    Usage: {idealTime.usage.toFixed(2)} kWh | Solar: {idealTime.solar.toFixed(2)} kWh
-                  </p>
-                </div>
+      <main className="flex-1">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-r from-green-400 to-blue-500">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center space-y-4 text-center">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-white">
+                  Optimize Your Energy, Maximize Your Savings
+                </h1>
+                <p className="mx-auto max-w-[700px] text-white md:text-xl">
+                  Smart energy management with real-time cost, solar integration, and usage tracking.
+                </p>
               </div>
-            ))}
+              <div className="space-x-4">
+                <Button className="bg-white text-green-600 hover:bg-green-100">Checkout Now</Button>
+              </div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </section>
+        <section id="about" className="w-full py-12 md:py-24 lg:py-32 bg-white">
+          <div className="container px-4 md:px-6">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-4">Innovative Power Management</h2>
+            <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed text-center">
+              At SolarFlex, we provide solutions that reduce electricity costs by optimizing usage patterns and utilizing solar power effectively.
+            </p>
+          </div>
+        </section>
+        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
+          <div className="container px-4 md:px-6">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-8">Our Smart Energy Solutions</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="flex flex-col items-center text-center">
+                <BarChart3 className="h-12 w-12 text-green-500 mb-4" />
+                <h3 className="text-xl font-bold mb-2">Real-time electricity cost tracking</h3>
+                <p className="text-gray-500">Monitor your energy costs as they happen.</p>
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <Sun className="h-12 w-12 text-yellow-500 mb-4" />
+                <h3 className="text-xl font-bold mb-2">Solar energy integration</h3>
+                <p className="text-gray-500">Seamlessly integrate with your solar panels.</p>
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <Zap className="h-12 w-12 text-blue-500 mb-4" />
+                <h3 className="text-xl font-bold mb-2">Efficient power usage management</h3>
+                <p className="text-gray-500">Optimize your energy consumption patterns.</p>
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <Settings className="h-12 w-12 text-purple-500 mb-4" />
+                <h3 className="text-xl font-bold mb-2">Customizable energy plans</h3>
+                <p className="text-gray-500">Tailor your energy strategy to your needs.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32 bg-white">
+          <div className="container px-4 md:px-6">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-8">How SolarFlex Works</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center text-2xl font-bold mb-4">1</div>
+                <h3 className="text-xl font-bold mb-2">Monitor</h3>
+                <p className="text-gray-500">Monitor electricity usage and costs in real time.</p>
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-full bg-yellow-500 text-white flex items-center justify-center text-2xl font-bold mb-4">2</div>
+                <h3 className="text-xl font-bold mb-2">Integrate</h3>
+                <p className="text-gray-500">Integrate with your solar panels for maximum efficiency.</p>
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-2xl font-bold mb-4">3</div>
+                <h3 className="text-xl font-bold mb-2">Manage</h3>
+                <p className="text-gray-500">Manage energy consumption based on demand and pricing.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
+          <div className="container px-4 md:px-6">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-8">What Our Clients Say</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <p className="text-gray-500 mb-4">"SolarFlex has revolutionized our energy management. We've seen a 30% reduction in our electricity costs!"</p>
+                <p className="font-bold">- John Doe, CEO of TechCorp</p>
+              </div>
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <p className="text-gray-500 mb-4">"The real-time tracking feature has made us much more conscious of our energy usage. It's been a game-changer."</p>
+                <p className="font-bold">- Jane Smith, Homeowner</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-green-500">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center space-y-4 text-center">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-white">
+                  Ready to Take Control of Your Energy?
+                </h2>
+              </div>
+              <div className="w-full max-w-sm space-y-2">
+                <form onSubmit={handleSubmit} className="flex space-x-2">
+                  <Input
+                    className="max-w-lg flex-1"
+                    placeholder="Enter your email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <Button type="submit" className="bg-white text-green-600 hover:bg-green-100">
+                    Start Saving Now
+                  </Button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
+        <p className="text-xs text-gray-500">© 2024 SolarFlex. All rights reserved.</p>
+        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
+          <a className="text-xs hover:underline underline-offset-4" href="#">
+            About
+          </a>
+          <a className="text-xs hover:underline underline-offset-4" href="#">
+            Contact
+          </a>
+          <a className="text-xs hover:underline underline-offset-4" href="#">
+            Blog
+          </a>
+          <a className="text-xs hover:underline underline-offset-4" href="#">
+            Terms
+          </a>
+        </nav>
+        <div className="flex items-center space-x-2">
+          <a href="#" className="text-gray-500 hover:text-gray-700">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
+            </svg>
+          </a>
+          <a href="#" className="text-gray-500 hover:text-gray-700">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+            </svg>
+          </a>
+          <a href="#" className="text-gray-500 hover:text-gray-700">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022  12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+            </svg>
+          </a>
+        </div>
+      </footer>
     </div>
   )
 }
