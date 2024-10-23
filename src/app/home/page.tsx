@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { CalendarIcon, Zap, DollarSign, Clock, Sun, ArrowRight } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,9 +12,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import axios from 'axios'
 
 // Enhanced mock data for the charts
-const data = [
+const initialData = [
   { time: '00:00', usage: 2, cost: 0.24, solar: 0, efficiency: 0.2, capacity: 5 },
   { time: '02:00', usage: 1.5, cost: 0.18, solar: 0, efficiency: 0.3, capacity: 5 },
   { time: '04:00', usage: 1, cost: 0.12, solar: 0, efficiency: 0.4, capacity: 5 },
@@ -53,6 +54,23 @@ export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
   const [scheduledTasks, setScheduledTasks] = useState<Array<{ time: string, task: string }>>([])
+  const [data, setData] = useState(initialData);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchEnergyData = async () => {
+      try {
+        const response = await axios.get('https://luminous-backend.onrender.com/get_energy_data/');
+        setData(response.data);
+      } catch (error) {
+        
+      }
+
+    };
+
+    fetchEnergyData();
+  }, []);
 
   const totalUsage = data.reduce((sum, item) => sum + (item.usage || 0), 0)
   const totalCost = data.reduce((sum, item) => sum + (item.cost || 0), 0)
@@ -324,11 +342,11 @@ export default function Dashboard() {
                                 <SelectValue placeholder="Select alternate slot" />
                               </SelectTrigger>
                               <SelectContent>
-                                {data.map((timeSlot, slotIndex) => (
+                                {/* {data.map((timeSlot, slotIndex) => (
                                   <SelectItem key={slotIndex} value={timeSlot.time}>
                                     {timeSlot.time} (Efficiency: {timeSlot.efficiency.toFixed(2)})
                                   </SelectItem>
-                                ))}
+                                ))} */}
                               </SelectContent>
                             </Select>
                           </div>
