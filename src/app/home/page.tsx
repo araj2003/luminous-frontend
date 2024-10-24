@@ -16,18 +16,18 @@ import axios from 'axios'
 
 // Enhanced mock data for the charts
 const initialData = [
-  { time: '00:00', usage: 2, cost: 0.24, solar: 0, efficiency: 0.2, capacity: 5 },
-  { time: '02:00', usage: 1.5, cost: 0.18, solar: 0, efficiency: 0.3, capacity: 5 },
-  { time: '04:00', usage: 1, cost: 0.12, solar: 0, efficiency: 0.4, capacity: 5 },
-  { time: '06:00', usage: 3, cost: 0.45, solar: 0.5, efficiency: 0.5, capacity: 6 },
-  { time: '08:00', usage: 4, cost: 0.60, solar: 1.5, efficiency: 0.6, capacity: 6 },
-  { time: '10:00', usage: 5, cost: 0.75, solar: 2.5, efficiency: 0.7, capacity: 7 },
-  { time: '12:00', usage: 4, cost: 0.60, solar: 3, efficiency: 0.8, capacity: 7 },
-  { time: '14:00', usage: 4.5, cost: 0.68, solar: 2.5, efficiency: 0.75, capacity: 7 },
-  { time: '16:00', usage: 5, cost: 0.75, solar: 2, efficiency: 0.7, capacity: 6 },
-  { time: '18:00', usage: 6, cost: 1.20, solar: 1, efficiency: 0.5, capacity: 6 },
-  { time: '20:00', usage: 4, cost: 0.80, solar: 0.2, efficiency: 0.4, capacity: 5 },
-  { time: '22:00', usage: 3.5, cost: 0.53, solar: 0, efficiency: 0.3, capacity: 5 },
+  { datetime: "2024-10-09 00:00:00", time: "00:00", usage: 1.9, cost: 0.55, solar: 0, efficiency: 0.2, capacity: 5 },
+  { datetime: "2024-10-09 02:00:00", time: "02:00", usage: 1.5, cost: 0.18, solar: 0, efficiency: 0.3, capacity: 5 },
+  { datetime: "2024-10-09 04:00:00", time: "04:00", usage: 1, cost: 0.12, solar: 0, efficiency: 0.4, capacity: 5 },
+  { datetime: "2024-10-09 06:00:00", time: "06:00", usage: 3, cost: 0.45, solar: 0.5, efficiency: 0.5, capacity: 6 },
+  { datetime: "2024-10-09 08:00:00", time: "08:00", usage: 4, cost: 0.60, solar: 1.5, efficiency: 0.6, capacity: 6 },
+  { datetime: "2024-10-09 10:00:00", time: "10:00", usage: 5, cost: 0.75, solar: 2.5, efficiency: 0.7, capacity: 7 },
+  { datetime: "2024-10-09 12:00:00", time: "12:00", usage: 4, cost: 0.60, solar: 3, efficiency: 0.8, capacity: 7 },
+  { datetime: "2024-10-09 14:00:00", time: "14:00", usage: 4.5, cost: 0.68, solar: 2.5, efficiency: 0.75, capacity: 7 },
+  { datetime: "2024-10-09 16:00:00", time: "16:00", usage: 5, cost: 0.75, solar: 2, efficiency: 0.7, capacity: 6 },
+  { datetime: "2024-10-09 18:00:00", time: "18:00", usage: 6, cost: 1.20, solar: 1, efficiency: 0.5, capacity: 6 },
+  { datetime: "2024-10-09 20:00:00", time: "20:00", usage: 4, cost: 0.80, solar: 0.2, efficiency: 0.4, capacity: 5 },
+  { datetime: "2024-10-09 22:00:00", time: "22:00", usage: 3.5, cost: 0.53, solar: 0, efficiency: 0.3, capacity: 5 },
 ]
 
 // Enhanced task list with usage values
@@ -71,27 +71,38 @@ export default function Dashboard() {
 
     fetchEnergyData();
   }, []);
-
+  
   const totalUsage = data.reduce((sum, item) => sum + (item.usage || 0), 0)
   const totalCost = data.reduce((sum, item) => sum + (item.cost || 0), 0)
   const totalSolar = data.reduce((sum, item) => sum + (item.solar || 0), 0)
   const averageUsage = totalUsage / (data.length || 1)
   
-  const efficiencyData = useMemo(() => {
-    return data.map(item => ({
-      ...item,
-      color: getColor(item.efficiency)
-    }))
-  }, [])
+  
+  const filterDataByDate = (date:any) => {
+    return data.filter(item => new Date(item.datetime).toDateString() === date.toDateString());
+  };
+  const filterData = selectedDate ? filterDataByDate(selectedDate) : data;
+  // const handleDateChange = (event:any) => {
+    //   const selectedDate = new Date(event.target.value);
+    //   setSelectedDate(selectedDate);
+    // };
+    
+    
 
+
+    const efficiencyData = filterData.map(item => ({
+      ...item,
+      // color: getColor(item.efficiency)
+      color: getColor(Math.round(Math.random() * 10) / 10)  
+    }))
   const allocateTasks = () => {
     const sortedTasks = [...tasks].sort((a, b) => b.usage - a.usage)
     const sortedSlots = [...efficiencyData].sort((a, b) => b.efficiency - a.efficiency)
     const allocatedTasks: { time: string, tasks: typeof tasks }[] = []
-
+    
     sortedSlots.forEach(slot => {
       const slotTasks: typeof tasks = []
-      let remainingCapacity = slot.capacity
+      let remainingCapacity = slot.capacity??Math.floor(Math.random() * 10) + 1
 
       sortedTasks.forEach(task => {
         if (task.usage <= remainingCapacity) {
@@ -114,8 +125,9 @@ export default function Dashboard() {
   const handleScheduleTask = (time: string, task: string) => {
     setScheduledTasks([...scheduledTasks, { time, task }])
   }
-
-  return (
+  
+    
+    return (
     <div className="container mx-auto p-4 bg-background">
       <header className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-primary">Advanced Power Consumption Dashboard</h1>
@@ -205,7 +217,7 @@ export default function Dashboard() {
               className="h-[300px]"
             >
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data}>
+                <AreaChart data={filterData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="time" />
                   <YAxis />
@@ -236,7 +248,7 @@ export default function Dashboard() {
               className="h-[300px]"
             >
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data}>
+                <LineChart data={filterData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="time" />
                   <YAxis />
