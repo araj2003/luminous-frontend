@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Sun, Zap, BarChart3, Settings, ChevronRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export default function LandingPage() {
   const [email, setEmail] = useState('')
@@ -13,6 +14,7 @@ export default function LandingPage() {
     // Handle form submission here
     console.log('Form submitted with email:', email)
   }
+  const router = useRouter()
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -49,7 +51,7 @@ export default function LandingPage() {
                 </p>
               </div>
               <div className="space-x-4">
-                <Button className="bg-white text-green-600 hover:bg-green-100">Checkout Now</Button>
+                <Button className="bg-white text-green-600 hover:bg-green-100" onClick={() => router.push('/auth')}>Checkout Now</Button>
               </div>
             </div>
           </div>
