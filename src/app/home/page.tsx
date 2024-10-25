@@ -46,7 +46,7 @@ const tasks = [
 
 const getColor = (ratio: number) => {
   if (ratio <= 0.33) return 'hsl(var(--chart-1))'
-  if (ratio <= 0.66) return 'hsl(var(--chart-2))'
+  else if (ratio <= 0.66) return 'hsl(var(--chart-2))'
   return 'hsl(var(--chart-3))'  
 }
 
@@ -61,7 +61,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchEnergyData = async () => {
       try {
-        const response = await axios.get('https://luminous-backend.onrender.com/get_energy_data/');
+        const response = await axios.get('http://127.0.0.1:8000/get_energy_data/');
         setData(response.data);
       } catch (error) {
         
@@ -71,11 +71,6 @@ export default function Dashboard() {
 
     fetchEnergyData();
   }, []);
-  
-  const totalUsage = data.reduce((sum, item) => sum + (item.usage || 0), 0)
-  const totalCost = data.reduce((sum, item) => sum + (item.cost || 0), 0)
-  const totalSolar = data.reduce((sum, item) => sum + (item.solar || 0), 0)
-  const averageUsage = totalUsage / (data.length || 1)
   
   
   const filterDataByDate = (date:any) => {
@@ -92,9 +87,14 @@ export default function Dashboard() {
 
     const efficiencyData = filterData.map(item => ({
       ...item,
-      // color: getColor(item.efficiency)
-      color: getColor(Math.round(Math.random() * 10) / 10)  
+      color: getColor(item.efficiency)
+      // color: getColor(Math.round(Math.random() * 10) / 10)  
     }))
+
+    const totalUsage = filterData.reduce((sum, item) => sum + (item.usage || 0), 0)
+  const totalCost = filterData.reduce((sum, item) => sum + (item.cost || 0), 0)
+  const totalSolar = filterData.reduce((sum, item) => sum + (item.solar || 0), 0)
+  const averageUsage = totalUsage / (data.length || 1)
   const allocateTasks = () => {
     const sortedTasks = [...tasks].sort((a, b) => b.usage - a.usage)
     const sortedSlots = [...efficiencyData].sort((a, b) => b.efficiency - a.efficiency)
