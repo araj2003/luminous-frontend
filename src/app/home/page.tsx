@@ -61,7 +61,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchEnergyData = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/get_energy_data/');
+        const response = await axios.get('https://luminous-backend.onrender.com/get_energy_data/');
         setData(response.data);
       } catch (error) {
         
